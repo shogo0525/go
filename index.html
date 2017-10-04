@@ -8,5 +8,33 @@
 </head>
 <body>
 
+  <canvas id="board" width="600" height="600"></canvas>
+
+  <script>
+    var canvas = document.getElementById("board");
+    var ctx = canvas.getContext("2d");
+    var boardSize = 19;
+    var cellSize = 30;
+
+    ctx.fillStyle = "#cc9900";
+    var outerSize = cellSize * (boardSize + 1)
+    ctx.fillRect(0, 0, outerSize, outerSize);
+
+    for(var i = 1; i <= boardSize; i++) {
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "#000000";
+
+      ctx.beginPath();
+      ctx.moveTo(cellSize, cellSize * i);
+      ctx.lineTo(cellSize * boardSize, cellSize * i);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cellSize * i, cellSize);
+      ctx.lineTo(cellSize * i, cellSize * boardSize);
+      ctx.stroke();
+    }
+  </script>
+
 </body>
 </html>
