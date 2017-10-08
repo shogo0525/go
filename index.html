@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Go Application</title>
+  <link rel="stylesheet" href="reset.css">
 </head>
 <body>
 
@@ -15,6 +16,7 @@
     var ctx = canvas.getContext("2d");
     var boardSize = 19;
     var cellSize = 30;
+    var turn = 'B';
 
     ctx.fillStyle = "#cc9900";
     var outerSize = cellSize * (boardSize + 1)
@@ -34,6 +36,70 @@
       ctx.lineTo(cellSize * i, cellSize * boardSize);
       ctx.stroke();
     }
+
+    canvas.addEventListener('click', onClick, false);
+    function onClick(e) {
+      // getBoundingClientRect()でcanvasの左上の座標を取得
+      var rect = e.target.getBoundingClientRect();
+      // クリック座標であるe.clientX,e.clientYからrectの値を引く
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+
+      //クリック場所が碁盤の外側なら何もしない
+      if (x < cellSize || x > cellSize * boardSize ||
+          y < cellSize || y > cellSize * boardSize) {
+        return;
+      }
+
+      // xZahyo, yZahyoは1~19の値をとる（19路盤の場合）
+      var xZahyo = getZahyo(x);
+      var yZahyo = getZahyo(y);
+
+      drawStone(xZahyo, yZahyo);
+
+      nextTurn();
+    }
+
+    // x座標もしくはy座標を取得するメソッド
+    function getZahyo(param) {
+      var sho = parseInt(param / cellSize);
+      var amari = param % cellSize;
+      var zahyo;
+      if (amari > cellSize / 2) {
+        zahyo = sho + 1;
+      } else {
+        zahyo = sho;
+      }
+      return zahyo;
+    }
+
+    function drawStone(xZahyo, yZahyo) {
+      if (turn == 'B'){
+        // 黒石
+        ctx.fillStyle = '#000000';
+      } else
+        // 白石
+        ctx.fillStyle = '#ffffff';
+        // 白石には枠をつける
+        ctx.strokeStyle = "#000000";
+      }
+
+      ctx.beginPath();
+      // zahyoにcellSizeをかけた値が実際に描画する位置になる
+      ctx.arc(xZahyo * cellSize, yZahyo * cellSize, cellSize/2.1, 0, Math.PI*2, false)
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function nextTurn() {
+      if (turn == 'B') {
+        turn = 'W';
+      } else {
+        turn = 'B';
+      }
+    }
+
   </script>
 
 </body>
