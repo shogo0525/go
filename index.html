@@ -77,7 +77,7 @@
       if (turn == 'B'){
         // 黒石
         ctx.fillStyle = '#000000';
-      } else
+      } else {
         // 白石
         ctx.fillStyle = '#ffffff';
         // 白石には枠をつける
@@ -86,7 +86,7 @@
 
       ctx.beginPath();
       // zahyoにcellSizeをかけた値が実際に描画する位置になる
-      ctx.arc(xZahyo * cellSize, yZahyo * cellSize, cellSize/2.1, 0, Math.PI*2, false)
+      ctx.arc(xZahyo * cellSize, yZahyo * cellSize, cellSize/2.1, 0, Math.PI*2, false);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
