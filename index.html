@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Go Application</title>
-  <link rel="stylesheet" href="reset.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Go Application</title>
+<link rel="stylesheet" href="reset.css">
 </head>
 <body>
 
@@ -17,6 +17,7 @@
     var boardSize = 19;
     var cellSize = 30;
     var turn = 'B';
+    var sgf = '';
 
     ctx.fillStyle = "#cc9900";
     var outerSize = cellSize * (boardSize + 1)
@@ -51,13 +52,17 @@
         return;
       }
 
-      // xZahyo, yZahyoは1~19の値をとる（19路盤の場合）
-      var xZahyo = getZahyo(x);
-      var yZahyo = getZahyo(y);
+      // zahyoは1~19の値をとる（19路盤の場合）
+      var zahyo = { x: getZahyo(x), y: getZahyo(y) };
 
-      drawStone(xZahyo, yZahyo);
+      if (canPut(zahyo)) {
+        drawStone(zahyo);
+        updateSGF(zahyo);
 
-      nextTurn();
+        nextTurn();
+      } else {
+        alert('そこに打つことはできません');
+      }
     }
 
     // x座標もしくはy座標を取得するメソッド
@@ -73,20 +78,19 @@
       return zahyo;
     }
 
-    function drawStone(xZahyo, yZahyo) {
+    function drawStone(zahyo) {
       if (turn == 'B'){
         // 黒石
         ctx.fillStyle = '#000000';
       } else {
-        // 白石
+        // 白石（枠線をつける）
         ctx.fillStyle = '#ffffff';
-        // 白石には枠をつける
         ctx.strokeStyle = "#000000";
       }
 
       ctx.beginPath();
       // zahyoにcellSizeをかけた値が実際に描画する位置になる
-      ctx.arc(xZahyo * cellSize, yZahyo * cellSize, cellSize/2.1, 0, Math.PI*2, false);
+      ctx.arc(zahyo.x * cellSize, zahyo.y * cellSize, cellSize/2.1, 0, Math.PI*2, false);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
@@ -98,6 +102,25 @@
       } else {
         turn = 'B';
       }
+    }
+
+    // 数値からsgf形式のデータに変換するための配列
+    var numberToSGF = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+                       'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's'
+                      ];
+
+    // 一手打つごとにsgfを更新する
+    function updateSGF(zahyo) {
+      var move = ";" + turn + "[" + numberToSGF[zahyo.x-1] + numberToSGF[zahyo.y-1] + "]";
+      sgf += move;
+    }
+
+    // zahyoに碁石が置けるかどうか
+    function canPut(zahyo) {
+      // 現在はsgfを中身をみて、過去に一度でも打った場所があるかどうかを判断するのみ
+      // 囲碁ロジックをきちんと組み込むときには修正が必要
+      var move = "[" + numberToSGF[zahyo.x-1] + numberToSGF[zahyo.y-1] + "]";
+      return sgf.indexOf(move) > -1 ? false : true;
     }
 
   </script>
