@@ -10,7 +10,7 @@
 <body onload="drawBoard()">
 
   <canvas id="board" width="600" height="600"></canvas>
-  <button onclick="moveBackOne()">一手戻る</button>
+  <button onclick="deleteMoveOne()">打った手を取り消す</button>
 
   <script>
     var canvas = document.getElementById("board");
@@ -154,8 +154,8 @@
       }
     }
     
-    // 一手戻る
-    function moveBackOne() {
+    // 打った手を取り消す
+    function deleteMoveOne() {
       sgfArray.pop();
       changeTurn();
       if (sgfArray.length == 0)  {
