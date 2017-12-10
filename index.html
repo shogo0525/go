@@ -7,9 +7,10 @@
 <title>Go Application</title>
 <link rel="stylesheet" href="reset.css">
 </head>
-<body>
+<body onload="drawBoard()">
 
   <canvas id="board" width="600" height="600"></canvas>
+  <button onclick="moveBackOne()">一手戻る</button>
 
   <script>
     var canvas = document.getElementById("board");
@@ -17,25 +18,38 @@
     var boardSize = 19;
     var cellSize = 30;
     var turn = 'B';
-    var sgf = '';
+    var sgf = ""
+    var sgfArray = [];
+    // 数値からsgf形式のデータに変換するための配列
+    var numberToSGF = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+                       'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's'
+                      ];
+    
+    // 色の定義
+    var c_brown = "#cc9900";
+    var c_black = "#000000";
+    var c_white = "#ffffff";
+    
+    
+    function drawBoard() {
+      ctx.fillStyle = c_brown;
+      var outerSize = cellSize * (boardSize + 1)
+      ctx.fillRect(0, 0, outerSize, outerSize);
 
-    ctx.fillStyle = "#cc9900";
-    var outerSize = cellSize * (boardSize + 1)
-    ctx.fillRect(0, 0, outerSize, outerSize);
+      for(var i = 1; i <= boardSize; i++) {
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = c_black;
 
-    for(var i = 1; i <= boardSize; i++) {
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = "#000000";
+        ctx.beginPath();
+        ctx.moveTo(cellSize, cellSize * i);
+        ctx.lineTo(cellSize * boardSize, cellSize * i);
+        ctx.stroke();
 
-      ctx.beginPath();
-      ctx.moveTo(cellSize, cellSize * i);
-      ctx.lineTo(cellSize * boardSize, cellSize * i);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(cellSize * i, cellSize);
-      ctx.lineTo(cellSize * i, cellSize * boardSize);
-      ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cellSize * i, cellSize);
+        ctx.lineTo(cellSize * i, cellSize * boardSize);
+        ctx.stroke();
+      }
     }
 
     canvas.addEventListener('click', onClick, false);
@@ -56,10 +70,8 @@
       var zahyo = { x: getZahyo(x), y: getZahyo(y) };
 
       if (canPut(zahyo)) {
-        drawStone(zahyo);
-        updateSGF(zahyo);
-
-        nextTurn();
+        addSGF(zahyo);
+        updateBoard();
       } else {
         alert('そこに打つことはできません');
       }
@@ -78,14 +90,14 @@
       return zahyo;
     }
 
-    function drawStone(zahyo) {
+    function drawStone(zahyo, turn) {
       if (turn == 'B'){
         // 黒石
-        ctx.fillStyle = '#000000';
+        ctx.fillStyle = c_black;
       } else {
         // 白石（枠線をつける）
-        ctx.fillStyle = '#ffffff';
-        ctx.strokeStyle = "#000000";
+        ctx.fillStyle = c_white;
+        ctx.strokeStyle = c_black;
       }
 
       ctx.beginPath();
@@ -96,7 +108,7 @@
       ctx.stroke();
     }
 
-    function nextTurn() {
+    function changeTurn() {
       if (turn == 'B') {
         turn = 'W';
       } else {
@@ -104,23 +116,53 @@
       }
     }
 
-    // 数値からsgf形式のデータに変換するための配列
-    var numberToSGF = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-                       'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's'
-                      ];
-
     // 一手打つごとにsgfを更新する
-    function updateSGF(zahyo) {
+    function addSGF(zahyo) {
       var move = ";" + turn + "[" + numberToSGF[zahyo.x-1] + numberToSGF[zahyo.y-1] + "]";
-      sgf += move;
+      var h = {
+        turn: turn,
+        zahyo: zahyo
+      }
+      sgfArray.push(h);
+      changeTurn();
+      updateRawSGF();
     }
+    
+    function updateRawSGF() {
+      sgf = "";
+      for(let i in sgfArray) {
+        var move = sgfArray[i];
+        move = ";" + move.turn + "[" + numberToSGF[move.zahyo.x-1] + numberToSGF[move.zahyo.y-1] + "]";
+        sgf += move;
+      }
+    }
+    
 
-    // zahyoに碁石が置けるかどうか
+    // 碁石が置けるかどうか
     function canPut(zahyo) {
       // 現在はsgfを中身をみて、過去に一度でも打った場所があるかどうかを判断するのみ
       // 囲碁ロジックをきちんと組み込むときには修正が必要
       var move = "[" + numberToSGF[zahyo.x-1] + numberToSGF[zahyo.y-1] + "]";
       return sgf.indexOf(move) > -1 ? false : true;
+    }
+    
+    // 碁盤の更新
+    function updateBoard() {
+      drawBoard();
+      for(let i in sgfArray) {
+        drawStone(sgfArray[i].zahyo, sgfArray[i].turn);
+      }
+    }
+    
+    // 一手戻る
+    function moveBackOne() {
+      sgfArray.pop();
+      changeTurn();
+      if (sgfArray.length == 0)  {
+        turn = "B";
+      }
+      updateRawSGF();
+      updateBoard();
     }
 
   </script>
